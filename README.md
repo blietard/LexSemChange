@@ -7,6 +7,7 @@
 - numpy
 - scipy
 - pandas
+- nltk
 - mangoes
 
 **Miscellaneous requirements :**
