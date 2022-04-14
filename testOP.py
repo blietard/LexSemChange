@@ -2,7 +2,7 @@ if __name__=='__main__':
 
     import matplotlib.pyplot as plt 
     import numpy as np
-    from utils import OrthogProcrustAlign, standardize
+    from tools.utils import OrthogProcrustAlign, standardize
 
     factor=2
 
