@@ -2,6 +2,11 @@ import scipy
 import numpy as np
 import mangoes
 from sklearn.utils.extmath import randomized_svd
+from tools.utils import standardize
+
+
+#============COUNT==============
+
 
 def create_count_matrix(corpus : mangoes.corpus.Corpus, vocabulary : mangoes.vocabulary.Vocabulary, window_size : int):
     return mangoes.counting.count_cooccurrence(corpus, vocabulary, context = mangoes.context.Window(vocabulary=vocabulary,size=window_size))
@@ -39,6 +44,8 @@ def creates_count_matrices_pair(corpus1 : mangoes.corpus.Corpus, corpus2: mangoe
     return (matrix1,matrix2,shared_vocabulary)
 
 
+#============PPMI==============
+
 def create_ppmi_matrix(counts_matrix, alpha, k):
     return mangoes.create_representation(counts_matrix, weighting=mangoes.weighting.ShiftedPPMI(alpha=alpha,shift=k))
 
@@ -67,6 +74,8 @@ def load_ppmi_matrices_as_csr(storage_folder: str):
     return (ppmi1_matrix, ppmi2_matrix)
     
 
+#============SVD==============
+
 def compute_SVD_representation(matrix,dim=100,gamma=1.0,random_state=None,n_iter=5):
     '''
     Compute U*Sigma^gamma representations from the truncated SVD of matrix.
@@ -79,3 +88,29 @@ def compute_SVD_representation(matrix,dim=100,gamma=1.0,random_state=None,n_iter
     else:
         matrix_reduced = np.power(s, gamma) * u
     return matrix_reduced
+
+def create_svd_matrices_pair(matrix1,matrix2,standardise=True, dim=100,gamma=1.0,random_state=None,n_iter=5, verbose=True):
+    '''
+    If `standardise` is True, gamma is ignored as cancelled by the standardisation process.
+    '''
+    if verbose:
+        print(f'[INFO] Computing {"standardised "*standardise}SVD matrices with gamma={gamma} and d={dim}.')
+        print('[INFO] Computing SVD matrix for Corpus 1...')
+    if standardise:
+        svd1 = standardize(compute_SVD_representation(matrix1,dim,0,random_state=random_state,n_iter=n_iter))
+        if verbose:
+            print('[INFO] Success!')
+            print('[INFO] Computing SVD matrix for Corpus 2...')
+        svd2 = standardize(compute_SVD_representation(matrix2,dim,0,random_state=random_state,n_iter=n_iter))
+        if verbose:
+            print('[INFO] Success!')
+    else:
+        svd1 = compute_SVD_representation(matrix1,dim,gamma,random_state=random_state,n_iter=n_iter)
+        if verbose:
+            print('[INFO] Success!')
+            print('[INFO] Computing SVD matrix for Corpus 2...')
+        svd2 = compute_SVD_representation(matrix2,dim,gamma,random_state=random_state,n_iter=n_iter)
+        if verbose:
+            print('[INFO] Success!')
+    return (svd1,svd2)
+        

@@ -17,6 +17,6 @@ def OrthogProcrustAlign(arr1,arr2, standard=False):
         B = standardize(arr2)
 
     temp = B.T @ A
-    U, e, Vt = scipy.linalg.svd(temp,)
+    U, e, Vt = np.linalg.svd(temp,)
     W = U @ Vt
     return W
