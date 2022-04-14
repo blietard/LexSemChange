@@ -1,0 +1,40 @@
+{
+    "words": {
+        "language": null,
+        "entity": null
+    },
+    "source": {
+        "words": {
+            "language": null,
+            "entity": null
+        },
+        "corpus": {
+            "lower": false,
+            "digit": false,
+            "ignore_punctuation": false,
+            "name": "../semeval2020_ulscd_posteval/starting_kit/test_data_public/english/corpus2/lemma/",
+            "language": null
+        },
+        "context_definition": {
+            "size": 10,
+            "dirty": false,
+            "dynamic": false,
+            "n_grams": 1,
+            "distance": false
+        },
+        "subsampling": false,
+        "contexts_words": {
+            "language": null,
+            "entity": null
+        }
+    },
+    "weighting": {
+        "name": "ShiftedPPMI",
+        "alpha": 0.75,
+        "shift": 1
+    },
+    "contexts_words": {
+        "language": null,
+        "entity": null
+    }
+}
