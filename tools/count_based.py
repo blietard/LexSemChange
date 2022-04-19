@@ -117,7 +117,13 @@ def create_svd_matrices_pair(matrix1,matrix2, storage_folder : str, standardise=
     if verbose:
         print(f'[INFO] Matrices stored in {storage_folder}/.')
 
-def load_svd_matrices(storage_folder: str):
-    svd1 =  np.load(f'{storage_folder}/svd1.npy')
-    svd2 =  np.load(f'{storage_folder}/svd2.npy')
+def load_svd_matrices(storage_folder: str, is_txt=False):
+    if is_txt:
+        matrix_array = np.loadtxt(f'{storage_folder}/svd1.txt', dtype=object, comments=None, delimiter=' ', skiprows=1, encoding='utf-8')
+        svd1 = matrix_array[:,1:].astype(np.float)
+        matrix_array = np.loadtxt(f'{storage_folder}/svd2.txt', dtype=object, comments=None, delimiter=' ', skiprows=1, encoding='utf-8')
+        svd2 = matrix_array[:,1:].astype(np.float)
+    else:
+        svd1 =  np.load(f'{storage_folder}/svd1.npy')
+        svd2 =  np.load(f'{storage_folder}/svd2.npy')
     return (svd1, svd2)

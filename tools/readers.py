@@ -53,7 +53,7 @@ class SemEvalReader():
             print(f"[INFO] Corpus 2: {corpus2.nb_sentences} sentences \t{len(corpus2._words_count)} words")
         return (corpus1, corpus2)
 
-    def spearman_score(self,matrix1,matrix2,word2index,language,out=True):
+    def spearman_score(self,matrix1,matrix2,word2idx_dict1,word2idx_dict2,language,out=True):
         targets = self.targets[language]
         gold_scores = self.gold_scores[language]
 
@@ -66,8 +66,9 @@ class SemEvalReader():
 
         distances = np.empty( len(targets) )
         for i, word in enumerate(targets):
-            index = word2index[word]
-            distances[i] = dist(matrix1[index],matrix2[index])
+            idx1 = word2idx_dict1[word]
+            idx2 = word2idx_dict2[word]
+            distances[i] = dist(matrix1[idx1],matrix2[idx2])
             
         rho, p = spearmanr( distances, gold_scores )
         if out:
