@@ -89,7 +89,7 @@ def compute_SVD_representation(matrix,dim=100,gamma=1.0,random_state=None,n_iter
         matrix_reduced = np.power(s, gamma) * u
     return matrix_reduced
 
-def create_svd_matrices_pair(matrix1,matrix2,standardise=True, dim=100,gamma=1.0,random_state=None,n_iter=5, verbose=True):
+def create_svd_matrices_pair(matrix1,matrix2, storage_folder : str, standardise=True, dim=100,gamma=1.0,random_state=None,n_iter=5, verbose=True):
     '''
     If `standardise` is True, gamma is ignored as cancelled by the standardisation process.
     '''
@@ -112,5 +112,12 @@ def create_svd_matrices_pair(matrix1,matrix2,standardise=True, dim=100,gamma=1.0
         svd2 = compute_SVD_representation(matrix2,dim,gamma,random_state=random_state,n_iter=n_iter)
         if verbose:
             print('[INFO] Success!')
-    return (svd1,svd2)
-        
+    np.save(storage_folder+'/svd1',svd1)
+    np.save(storage_folder+'/svd2',svd2)
+    if verbose:
+        print(f'[INFO] Matrices stored in {storage_folder}/.')
+
+def load_svd_matrices(storage_folder: str):
+    svd1 =  np.load(f'{storage_folder}/svd1.npy')
+    svd2 =  np.load(f'{storage_folder}/svd2.npy')
+    return (svd1, svd2)

@@ -4,7 +4,7 @@ import numpy as np
 def standardize(arr):
     return ( arr-arr.mean(0)  )/(arr.std(0) )
 
-def OrthogProcrustAlign(arr1,arr2, standard=False):
+def OrthogProcrustAlign(arr1,arr2, standard=False, backward=False):
     '''
     Return Orthogonal Procrustes alignment matrix of arr1 and arr2.
     `standard` set to True if arr1 and arr2 are already standardized. Default is False.
@@ -18,5 +18,8 @@ def OrthogProcrustAlign(arr1,arr2, standard=False):
 
     temp = B.T @ A
     U, e, Vt = np.linalg.svd(temp,)
-    W = U @ Vt
+    if backward:
+        W = Vt.T @ U.T
+    else:
+        W = U @ Vt
     return W
