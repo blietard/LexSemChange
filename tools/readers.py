@@ -30,7 +30,7 @@ class Reader():
         return (corpus1, corpus2)
 
     def read_targets(self,language : str, out=True):
-        pass
+        raise NotImplementedError("read_targets method was not implemented for this reader.")
 
     def spearman_score(self,matrix1,matrix2,word2idx_dict1,word2idx_dict2,targets, gold_scores,out=True):
         if hasattr(matrix1,'toarray'):
