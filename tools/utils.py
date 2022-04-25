@@ -1,5 +1,6 @@
 import scipy
 import numpy as np
+import mangoes
 
 def standardize(arr):
     return ( arr-arr.mean(0)  )/(arr.std(0) )
@@ -45,3 +46,13 @@ def OrthogProcrustAlign(arr1,arr2, standard=False, backward=False, std_func=stan
     else:
         W = U @ Vt
     return W
+
+def shared_vocabulary(corpus1: mangoes.corpus.Corpus,corpus2: mangoes.corpus.Corpus,out_vocab_len=True):
+    vocab1 = corpus1.create_vocabulary()
+    vocab2 = corpus2.create_vocabulary()
+    shared_vocabulary = mangoes.Vocabulary(list(set(vocab1.words) & set(vocab2.words)))
+    if out_vocab_len:
+        return (shared_vocabulary, (len(vocab1),len(vocab2),len(shared_vocabulary)) )
+    else:
+        return shared_vocabulary
+    

@@ -32,7 +32,7 @@ class Reader():
     def read_targets(self,language : str, out=True):
         raise NotImplementedError("read_targets method was not implemented for this reader.")
 
-    def spearman_score(self,matrix1,matrix2,word2idx_dict1,word2idx_dict2,targets, gold_scores,out=True):
+    def spearman_score(self,matrix1,matrix2,word2idx_dict1,word2idx_dict2,targets, gold_scores,out=True, nan_replace=1.0):
         if hasattr(matrix1,'toarray'):
             #need for conversion to array
             dist = lambda x1,x2 : cos_dist(x1.toarray(),x2.toarray()) 
@@ -44,7 +44,12 @@ class Reader():
         for i, word in enumerate(targets):
             idx1 = word2idx_dict1[word]
             idx2 = word2idx_dict2[word]
-            distances[i] = dist(matrix1[idx1],matrix2[idx2])
+            d = dist(matrix1[idx1],matrix2[idx2])
+            if np.isnan(dist(matrix1[idx1],matrix2[idx2])):
+                print(f'[WARNING] Null vector encountered for word \'{word}\'.')
+                distances[i] = nan_replace
+            else:
+                distances[i] = d
             
         rho, p = spearmanr( distances, gold_scores )
         if out:
@@ -96,9 +101,9 @@ class SemEvalReader(Reader):
         if out:
             return (targets,gold_scores)
     
-    def spearman_score(self,matrix1,matrix2,word2idx_dict1,word2idx_dict2,language,out=True):
+    def spearman_score(self,matrix1,matrix2,word2idx_dict1,word2idx_dict2,language,out=True, nan_replace=1.0):
         targets = self.targets[language]
         gold_scores = self.gold_scores[language]
-        score = super().spearman_score(matrix1, matrix2, word2idx_dict1, word2idx_dict2, targets, gold_scores, out)
+        score = super().spearman_score(matrix1, matrix2, word2idx_dict1, word2idx_dict2, targets, gold_scores, out, nan_replace)
         if out:
             return score
