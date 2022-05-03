@@ -2,6 +2,18 @@ import scipy
 import numpy as np
 import mangoes
 
+
+
+def dist(x1, x2, metric=scipy.spatial.distance.cosine):
+    if hasattr(x1, 'toarray'):
+        # need for conversion to array
+        return metric(x1.toarray(), x2.toarray())
+    else:
+        # no need
+        return metric(x1, x2)
+
+
+
 def standardize(arr):
     return ( arr-arr.mean(0)  )/(arr.std(0) )
 

@@ -2,7 +2,7 @@ import scipy
 import numpy as np
 import mangoes
 from sklearn.utils.extmath import randomized_svd
-from tools.utils import *
+from tools.utils import standardize
 
 
 #============COUNT==============
@@ -67,7 +67,7 @@ def create_ppmi_matrices_pair(counts_matrix1, counts_matrix2, alpha, k, storage_
     if verbose:
         print(f'[INFO] Matrices stored in {storage_folder}/.')
 
-def load_ppmi_matrices_as_csr(storage_folder: str, vocabulary=None, word2index=None,matrix_name=None):
+def load_ppmi_matrices_as_csr(storage_folder: str, vocabulary=None,matrix_name=None):
     check_voc = True
     if matrix_name is None:
         check_voc = False
@@ -81,11 +81,10 @@ def load_ppmi_matrices_as_csr(storage_folder: str, vocabulary=None, word2index=N
     
     if check_voc:
         v = mangoes.vocabulary.Vocabulary.load(f'{storage_folder}/ppmi1/',vocab_name)
-        if v != vocabulary:
-            #recreate word2index
-            word2index = dict()
-            for i, word in enumerate(list(v.words)):
-                word2index[word]=i
+        #recreate word2index
+        word2index = dict()
+        for i, word in enumerate(list(v.words)):
+            word2index[word]=i
         return (ppmi1_matrix, ppmi2_matrix, v, word2index)
     return (ppmi1_matrix,ppmi2_matrix)
 
