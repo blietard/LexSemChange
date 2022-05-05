@@ -11,12 +11,13 @@ storage_folder= '/home/bastien/lscd/static_embdgs/matrices'
 language= 'english'
 score_folder = './results/scores/'
 
-ws_list = [1,2,3,5,7,10,12,200]
-alpha_list = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]
-k_list = [1,1.5,2,3,4,5,6,8,10,15]
-svd_dim = 300
-svd_niter = 5
+ws_list = [5,10,200]
+alpha_list = [0.75, 1.0]
+k_list = [1,5]
+dim_list = [100,300,512,1024]
+svd_niter = 8
 rng_seed = None
+n_oversamples = 20
 op_func = centerunit
 
 
@@ -35,35 +36,54 @@ for i, word in enumerate(list(vocabulary.words)):
 
 #=========PPMI=========
 ## To start from existing COUNT matrices, uncomment the 2 next lines and comment sections COUNT
-#for window_size in ws_list:
-max_i = len(alpha_list)*len(k_list)
-for window_size in ws_list:
-    print(f'[INFO]..... COUNTING WITH WS={window_size} .....')
-    matrix_name = f'count_ws{window_size}'
-    counts_matrix1, counts_matrix2, vocabulary, word2index = load_count_matrices(folder+'count',matrix_name, vocabulary, word2index)
-    i = 0
-    for ppmi_alpha in alpha_list:
-        for ppmi_k in k_list:
-            _,_,ppmi_score = compute_score_PPMI(counts_matrix1,counts_matrix2,ppmi_alpha,ppmi_k,word2index,folder,reader,language)
-            ppmi_matrix_name = matrix_name + f'-ppmi_a{ppmi_alpha}_k{ppmi_k}'
-            rename_and_clean_PPMIs(folder+'ppmi', ppmi_matrix_name, move_to=matrix_name+'/')
-            try:
-                with open(score_folder+matrix_name+'/'+ppmi_matrix_name,'r') as f:
-                    txt = f.read()+'\n'
-            except FileNotFoundError:
-                txt = ''
-            with open(score_folder+matrix_name+'/'+ppmi_matrix_name,'w') as f:
-                txt += str(ppmi_score[0]) + '\t' + str(ppmi_score[1])
-                f.write(txt)
-            i+=1
-            print(f'[INFO]..... {np.round(i*100/max_i,2)} .....')
-    del counts_matrix1, counts_matrix2
+# max_i = len(alpha_list)*len(k_list)
+# for window_size in ws_list:
+#     print(f'[INFO]..... COUNTING WITH WS={window_size} .....')
+#     matrix_name = f'count_ws{window_size}'
+#     counts_matrix1, counts_matrix2, vocabulary, word2index = load_count_matrices(folder+'count',matrix_name, vocabulary, word2index)
+#     i = 0
+#     for ppmi_alpha in alpha_list:
+#         for ppmi_k in k_list:
+#             _,_,ppmi_score = compute_score_PPMI(counts_matrix1,counts_matrix2,ppmi_alpha,ppmi_k,word2index,folder,reader,language)
+#             ppmi_matrix_name = matrix_name + f'-ppmi_a{ppmi_alpha}_k{ppmi_k}'
+#             rename_and_clean_PPMIs(folder+'ppmi', ppmi_matrix_name, move_to=matrix_name+'/')
+#             try:
+#                 with open(score_folder+matrix_name+'/'+ppmi_matrix_name,'r') as f:
+#                     txt = f.read()+'\n'
+#             except FileNotFoundError:
+#                 txt = ''
+#             with open(score_folder+matrix_name+'/'+ppmi_matrix_name,'w') as f:
+#                 txt += str(ppmi_score[0]) + '\t' + str(ppmi_score[1])
+#                 f.write(txt)
+#             i+=1
+#             print(f'[INFO]..... {np.round(i*100/max_i,2)} .....')
+#     del counts_matrix1, counts_matrix2
 
 # #=========SVD=========
 # ## To start from existing PPMI matrices, uncomment the 2 next lines and comment sections COUNT and PPMI
-# #matrix_name = f'count_ws{window_size}-ppmi_a{ppmi_alpha}_k{ppmi_k}'
-# #ppmi1, ppmi2 = load_ppmi_matrices_as_csr(folder+'ppmi',vocabulary, word2index, matrix_name)
-# matrix_name += f'-svd_d{svd_dim}'
-# svd_score = compute_score_SVD(ppmi1,ppmi2,svd_dim,rng_seed,svd_niter,word2index ,folder, reader, language, op_func, matrix_name)
-# del ppmi1, ppmi2
+max_i = len(alpha_list)*len(k_list)*len(dim_list)
+window_size = 5
+i=0
+for ppmi_alpha in alpha_list:
+    for ppmi_k in k_list:
+        print(f'[INFO] PPMI PARAMS : alpha={ppmi_alpha}, k={ppmi_k} .....')
+        matrix_name = f'count_ws{window_size}-ppmi_a{ppmi_alpha}_k{ppmi_k}'
+        ppmi1, ppmi2, vocabulary, word2index = load_ppmi_matrices_as_csr(storage_folder = folder+'ppmi', vocabulary=vocabulary,
+                                                                    matrix_name= f'count_ws{window_size}/'+matrix_name)
+        for svd_dim in dim_list:
+            svd_matrix_name = matrix_name+ f'-svd_d{svd_dim}'
+            vocabulary.save(folder+'svd/svd1/',svd_matrix_name+'_words')
+            vocabulary.save(folder+'svd/svd2/',matrix_name+'_words')
+            svd_score = compute_score_SVD(ppmi1,ppmi2,svd_dim,rng_seed,svd_niter,word2index ,folder, reader, language, op_func, svd_matrix_name, n_oversamples=n_oversamples)
+            try:
+                with open(score_folder+f'count_ws{window_size}/'+svd_matrix_name,'r') as f:
+                    txt = f.read()+'\n'
+            except FileNotFoundError:
+                txt = ''
+            with open(score_folder+f'count_ws{window_size}/'+svd_matrix_name,'w') as f:
+                txt += str(svd_score[0]) + '\t' + str(svd_score[1])
+                f.write(txt)
+            i+=1
+            print(f'[INFO]..... {np.round(i*100/max_i,2)} .....')
+        del ppmi1, ppmi2
 

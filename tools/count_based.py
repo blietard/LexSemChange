@@ -90,11 +90,11 @@ def load_ppmi_matrices_as_csr(storage_folder: str, vocabulary=None,matrix_name=N
 
 #============SVD==============
 
-def compute_SVD_representation(matrix,dim=100,gamma=1.0,random_state=None,n_iter=5):
+def compute_SVD_representation(matrix,dim=100,gamma=1.0,random_state=None,n_oversamples=10, n_iter=5):
     '''
     Compute U*Sigma^gamma representations from the truncated SVD of matrix.
     '''
-    u, s, v = randomized_svd(matrix, n_components=dim, n_iter=n_iter, transpose=False,random_state=random_state)
+    u, s, v = randomized_svd(matrix, n_components=dim, n_oversamples=n_oversamples ,n_iter=n_iter, transpose=False,random_state=random_state)
     if gamma == 0.0:
         matrix_reduced = u
     elif gamma == 1.0:
@@ -103,12 +103,12 @@ def compute_SVD_representation(matrix,dim=100,gamma=1.0,random_state=None,n_iter
         matrix_reduced = np.power(s, gamma) * u
     return matrix_reduced
 
-def create_svd_matrices_pair(matrix1,matrix2, storage_folder : str, standardise=True, dim=100,gamma=1.0,random_state=None,n_iter=5, verbose=True, matrix_name=None):
+def create_svd_matrices_pair(matrix1,matrix2, storage_folder : str, standardise=True, dim=100,gamma=1.0,random_state=None,n_iter=5, n_oversamples=10, verbose=True, matrix_name=None):
     '''
     If `standardise` is True, gamma is ignored as cancelled by the standardisation process.
     '''
     if matrix_name is None:
-        matrix_name = 'svd'
+        matrix_name = 'matrix'
     if verbose:
         print(f'[INFO] Computing {"standardised "*standardise}SVD matrices with gamma={gamma} and d={dim}.')
         print('[INFO] Computing SVD matrix for Corpus 1...')
@@ -121,11 +121,11 @@ def create_svd_matrices_pair(matrix1,matrix2, storage_folder : str, standardise=
         if verbose:
             print('[INFO] Success!')
     else:
-        svd1 = compute_SVD_representation(matrix1,dim,gamma,random_state=random_state,n_iter=n_iter)
+        svd1 = compute_SVD_representation(matrix1,dim,gamma,random_state=random_state,n_iter=n_iter, n_oversamples=n_oversamples)
         if verbose:
             print('[INFO] Success!')
             print('[INFO] Computing SVD matrix for Corpus 2...')
-        svd2 = compute_SVD_representation(matrix2,dim,gamma,random_state=random_state,n_iter=n_iter)
+        svd2 = compute_SVD_representation(matrix2,dim,gamma,random_state=random_state,n_iter=n_iter, n_oversamples=n_oversamples)
         if verbose:
             print('[INFO] Success!')
     np.save(storage_folder+'/svd1/'+matrix_name,svd1)
@@ -134,8 +134,12 @@ def create_svd_matrices_pair(matrix1,matrix2, storage_folder : str, standardise=
         print(f'[INFO] Matrices stored in {storage_folder}/.')
 
 def load_svd_matrices(storage_folder: str, is_txt=False, matrix_name=None):
+    check_voc = True
     if matrix_name is None:
-        matrix_name='svd'
+        check_voc = False
+        matrix_name='matrix'
+    else:
+        vocab_name = matrix_name+'_words'
     if is_txt:
         matrix_array = np.loadtxt(f'{storage_folder}/svd1/{matrix_name}.txt', dtype=object, comments=None, delimiter=' ', skiprows=1, encoding='utf-8')
         svd1 = matrix_array[:,1:].astype(np.float)

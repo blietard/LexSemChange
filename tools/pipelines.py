@@ -94,8 +94,8 @@ def rename_and_clean_PPMIs(folder, matrix_name, move_to=''):
     os.remove(folder+'/ppmi2/words.txt')
     os.remove(folder+'/ppmi2/.metadata')
 
-def compute_score_SVD(ppmi1,ppmi2,svd_dim,rng_seed,svd_niter,word2index, folder, reader, language, op_func, matrix_name):
-    create_svd_matrices_pair(ppmi1,ppmi2,folder+'svd',standardise=False, dim=svd_dim,gamma=0.0,random_state=rng_seed,n_iter=svd_niter, verbose=True, matrix_name=matrix_name)
+def compute_score_SVD(ppmi1,ppmi2,svd_dim,rng_seed,svd_niter , word2index, folder, reader, language, op_func, matrix_name, n_oversamples=10):
+    create_svd_matrices_pair(ppmi1,ppmi2,folder+'svd',standardise=False, dim=svd_dim,gamma=0.0,random_state=rng_seed,n_iter=svd_niter, verbose=True, matrix_name=matrix_name, n_oversamples=n_oversamples)
     svd1, svd2 = load_svd_matrices(folder+'svd',matrix_name=matrix_name)
     print('[INFO] Aligning SVD with OP')
     svd1_std = op_func(svd1)
